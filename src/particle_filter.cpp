@@ -173,6 +173,25 @@ void ParticleFilter::resample() {
    *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
    */
 
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::discrete_distribution<> discrete_dist(weights.begin(), weights.end());
+
+  vector<Particle> new_particles(num_particles);
+  for (int i = 0; i < num_particles; ++i) {
+
+    int particle_id = discrete_dist(gen);
+
+    new_particles[i].x = particles[particle_id].x;
+    new_particles[i].y = particles[particle_id].y;
+    new_particles[i].theta = particles[particle_id].theta;
+    new_particles[i].weight = particles[particle_id].weight;
+
+    weights[i] = particles[particle_id].weight;
+  }
+
+  particles = new_particles;
+
 }
 
 void ParticleFilter::SetAssociations(Particle& particle, 
