@@ -104,6 +104,14 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
 
 }
 
+inline double multivariate2DGaussian(double x, double ux, double sigmaX, double y, double uy, double sigmaY){
+  double gaussNorm = 1/ ( 2 * M_PI * sigmaX * sigmaY );
+  double exponent = (x - ux) * (x - ux) / ( 2 * sigmaX * sigmaX ) + (y - uy) * (y - uy) / ( 2 * sigmaY * sigmaY );
+  double prob =  gaussNorm * exp(-exponent) ;
+
+  return prob;
+}
+
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
                                    const vector<LandmarkObs> &observations, 
                                    const Map &map_landmarks) {
