@@ -129,6 +129,40 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
 
+  for (int i = 0; i < num_particles; ++i) {
+
+    double weight = 1.0;
+
+    for (unsigned int j = 0; j < observations.size(); ++j) {
+      LandmarkObs l;
+      l.x = particles[i].x + observations[j].x * cos(particles[i].theta) - observations[j].y * sin(particles[i].theta);
+      l.y = particles[i].y + observations[j].x * sin(particles[i].theta) + observations[j].y * cos(particles[i].theta);
+
+      double min_distance = 2 * sensor_range;
+      double min_id = -1;
+
+      for(unsigned int k = 0; k < map_landmarks.landmark_list.size(); ++k) {
+        double distance = dist(l.x, l.y, map_landmarks.landmark_list[k].x_f, map_landmarks.landmark_list[k].y_f);
+
+        if( distance <= sensor_range && distance < min_distance) {
+          min_distance = distance;
+          min_id = k;
+        }
+      }
+
+      if( min_id > -1 ){
+        double prob = multivariate2DGaussian(l.x, map_landmarks.landmark_list[min_id].x_f, std_landmark[0],
+                          l.y, map_landmarks.landmark_list[min_id].y_f, std_landmark[1]);
+        weight *= prob;
+      }
+
+    }
+
+    particles[i].weight = weight;
+    weights[i] = weight;
+
+  }
+
 }
 
 void ParticleFilter::resample() {
